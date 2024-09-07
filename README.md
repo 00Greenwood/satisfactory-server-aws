@@ -42,13 +42,13 @@ At a minimum, account (account number) and region are required.
 This assumes you have all requirements and have [configured aws cli](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html)
 
 1. [Clone this project](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
-2. `npm install`
+1. `yarn`
+2. `cp server-hosting/.config.sample.ts server-hosting/.config.ts` (see [Configuration](#configuration) for customization). You must fill in region and account!
 3. `npx cdk bootstrap <aws account number>/<aws region>` (replace account number and region)
-4. `cp server-hosting/.config.sample.ts server-hosting/.config.ts` if you have not done so (see [Configuration](#configuration) for customization); you must fill in region and account
-5. `npx cdk deploy`
-6. Wait for the CloudFormation stack to finish. It may take a few minutes for the server to download/install everything after the stack is finished.
-7. Use the Ec2 instance public IP address to connect to your server in Satisfactory Server Manager (see [DNS and IP management](#dns-and-ip-management))
-8. Start a new game or upload a save
+4. `npx cdk deploy`
+5. Wait for the CloudFormation stack to finish. It may take a few minutes for the server to download/install everything after the stack is finished.
+6. Use the Ec2 instance public IP address to connect to your server in Satisfactory Server Manager (see [DNS and IP management](#dns-and-ip-management))
+7. Start a new game or upload a save
 
 ## Accessing your server
 

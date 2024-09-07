@@ -4,22 +4,27 @@
   "bin": {
     "server-hosting": "server-hosting/server-hosting.js"
   },
+  "engines": {
+    "node": ">=20",
+    "yarn": ">=1.22"
+  },
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "cdk": "cdk"
+    "bootstrap": "npx cdk bootstrap",
+    "deploy": "npx cdk deploy"
   },
   "devDependencies": {
-    "@types/node": "10.17.27",
-    "aws-cdk": "2.3.0",
-    "ts-node": "^9.0.0",
-    "typescript": "~3.9.7",
-    "@aws-sdk/client-ec2": "3.45.0",
-    "esbuild": "0.14.10"
+    "@aws-sdk/client-ec2": "^3.645.0",
+    "@types/node": "^22.5.4",
+    "aws-cdk": "^2.156.0",
+    "esbuild": "^0.23.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
   },
   "dependencies": {
-    "aws-cdk-lib": "2.3.0",
-    "constructs": "^10.0.0",
-    "source-map-support": "^0.5.16"
+    "aws-cdk-lib": "^2.156.0",
+    "constructs": "^10.3.0",
+    "source-map-support": "^0.5.21"
   }
 }
