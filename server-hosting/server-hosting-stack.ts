@@ -21,8 +21,45 @@ import { Bucket, IBucket } from "aws-cdk-lib/aws-s3";
 import { Asset } from "aws-cdk-lib/aws-s3-assets";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { ManagedPolicy, PolicyStatement } from "aws-cdk-lib/aws-iam";
-import { LambdaRestApi } from "aws-cdk-lib/aws-apigateway";
+import {
+  LambdaIntegration,
+  LambdaRestApi,
+  RestApi,
+} from "aws-cdk-lib/aws-apigateway";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
+
+type HandlerType = "Start" | "Stop" | "Reboot";
+
+const createLambda = (
+  stack: Stack,
+  restApi: RestApi,
+  instanceId: string,
+  handler: HandlerType
+) => {
+  const lambda = new NodejsFunction(
+    stack,
+    `${Config.prefix}${handler}ServerLambda`,
+    {
+      entry: `./server-hosting/lambda/${handler.toLowerCase()}.ts`,
+      description: `${handler} game server`,
+      timeout: Duration.seconds(10),
+      environment: {
+        INSTANCE_ID: instanceId,
+      },
+      runtime: Runtime.NODEJS_20_X,
+    }
+  );
+
+  lambda.addToRolePolicy(
+    new PolicyStatement({
+      actions: [`ec2:${handler}Instances`],
+      resources: [`arn:aws:ec2:*:${Config.account}:instance/${instanceId}`],
+    })
+  );
+
+  const resource = restApi.root.addResource(handler.toLowerCase());
+  resource.addMethod("GET", new LambdaIntegration(lambda));
+};
 
 export class ServerHostingStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -177,33 +214,10 @@ export class ServerHostingStack extends Stack {
     //////////////////////////////
 
     if (Config.restartApi && Config.restartApi === true) {
-      const startServerLambda = new NodejsFunction(
-        this,
-        `${Config.prefix}StartServerLambda`,
-        {
-          entry: "./server-hosting/lambda/index.ts",
-          description: "Restart game server",
-          timeout: Duration.seconds(10),
-          environment: {
-            INSTANCE_ID: server.instanceId,
-          },
-          runtime: Runtime.NODEJS_20_X,
-        }
-      );
-
-      startServerLambda.addToRolePolicy(
-        new PolicyStatement({
-          actions: ["ec2:StartInstances"],
-          resources: [
-            `arn:aws:ec2:*:${Config.account}:instance/${server.instanceId}`,
-          ],
-        })
-      );
-
-      new LambdaRestApi(this, `${Config.prefix}StartServerApi`, {
-        handler: startServerLambda,
-        description: "Trigger lambda function to start server",
-      });
+      const restApi = new RestApi(this, `${prefix}ServerApi`);
+      createLambda(this, restApi, server.instanceId, "Start");
+      createLambda(this, restApi, server.instanceId, "Stop");
+      createLambda(this, restApi, server.instanceId, "Reboot");
     }
   }
 }
