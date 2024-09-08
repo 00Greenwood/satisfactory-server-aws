@@ -20,9 +20,9 @@ apt install -y unzip lib32gcc1 steamcmd
 
 # install satisfactory: https://satisfactory.fandom.com/wiki/Dedicated_servers
 if [ $USE_EXPERIMENTAL_BUILD = "true" ]; then
-    STEAM_INSTALL_SCRIPT="/usr/games/steamcmd +login anonymous +app_update 1690800 -beta experimental validate +quit"
+    STEAM_INSTALL_SCRIPT="/usr/games/steamcmd +force_install_dir /home/ubuntu/SatisfactoryDedicatedServer +login anonymous +app_update 1690800 -beta experimental validate +quit"
 else
-    STEAM_INSTALL_SCRIPT="/usr/games/steamcmd +login anonymous +app_update 1690800 validate +quit"
+    STEAM_INSTALL_SCRIPT="/usr/games/steamcmd +force_install_dir /home/ubuntu/SatisfactoryDedicatedServer +login anonymous +app_update 1690800 -beta public validate +quit"
 fi
 # note, we are switching users because steam doesn't recommend running steamcmd as root
 su - ubuntu -c "$STEAM_INSTALL_SCRIPT"
@@ -30,20 +30,20 @@ su - ubuntu -c "$STEAM_INSTALL_SCRIPT"
 # enable as server so it stays up and start: https://satisfactory.fandom.com/wiki/Dedicated_servers/Running_as_a_Service
 cat << EOF > /etc/systemd/system/satisfactory.service
 [Unit]
-Description=Satisfactory dedicated server
+Description=Satisfactory Dedicated Server
 Wants=network-online.target
 After=syslog.target network.target nss-lookup.target network-online.target
 
 [Service]
 Environment="LD_LIBRARY_PATH=./linux64"
 ExecStartPre=$STEAM_INSTALL_SCRIPT
-ExecStart=/home/ubuntu/.steam/steamapps/common/SatisfactoryDedicatedServer/FactoryServer.sh
+ExecStart=/home/ubuntu/SatisfactoryDedicatedServer/FactoryServer.sh -multihome=0.0.0.0
 User=ubuntu
 Group=ubuntu
 StandardOutput=journal
 Restart=on-failure
 KillSignal=SIGINT
-WorkingDirectory=/home/ubuntu/.steam/steamapps/common/SatisfactoryDedicatedServer
+WorkingDirectory=/home/ubuntu/SatisfactoryDedicatedServer
 
 [Install]
 WantedBy=multi-user.target
@@ -55,7 +55,7 @@ systemctl start satisfactory
 cat << 'EOF' > /home/ubuntu/auto-shutdown.sh
 #!/bin/sh
 
-shutdownIdleMinutes=5
+shutdownIdleMinutes=15
 idleCheckFrequencySeconds=5
 
 isIdle=0

@@ -94,7 +94,6 @@ export class ServerHostingStack extends Stack {
       "Beacon port"
     );
     securityGroup.addIngressRule(Peer.anyIpv4(), Port.udp(15777), "Query port");
-    securityGroup.addIngressRule(Peer.anyIpv4(), Port.udp(22), "SSH port");
 
     const server = new Instance(this, `${prefix}Server`, {
       // 4 vCPU, 16 GB RAM should be enough for most factories
